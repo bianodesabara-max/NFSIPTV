@@ -1,5 +1,7 @@
 package nfs.iptv
 
+import android.content.Context
+import android.os.Build
 import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
@@ -41,6 +43,7 @@ import androidx.media3.common.util.UnstableApi
 import androidx.media3.datasource.DefaultHttpDataSource
 import androidx.media3.exoplayer.ExoPlayer
 import androidx.media3.exoplayer.source.DefaultMediaSourceFactory
+import androidx.media3.ui.AspectRatioFrameLayout
 import androidx.media3.ui.PlayerView
 
 @OptIn(UnstableApi::class)
@@ -55,6 +58,24 @@ class PlayerActivity : ComponentActivity() {
     private var aviso by mutableStateOf<String?>(null)
     private var mostrarInfo by mutableStateOf(true)
     private var controlesVisiveis by mutableStateOf(false)
+    private var modoTela by mutableIntStateOf(AspectRatioFrameLayout.RESIZE_MODE_ZOOM)
+
+    private val modos = listOf(
+        AspectRatioFrameLayout.RESIZE_MODE_ZOOM to "Preencher",
+        AspectRatioFrameLayout.RESIZE_MODE_FILL to "Esticar",
+        AspectRatioFrameLayout.RESIZE_MODE_FIT to "Ajustar",
+    )
+    private fun nomeModo(m: Int) = modos.firstOrNull { it.first == m }?.second ?: "Preencher"
+    private val avisoModo = Runnable { if (aviso?.startsWith("Tela:") == true) aviso = null }
+
+    private fun trocarModoTela() {
+        val i = modos.indexOfFirst { it.first == modoTela }
+        modoTela = modos[(i + 1) % modos.size].first
+        getSharedPreferences("player", Context.MODE_PRIVATE).edit().putInt("modoTela", modoTela).apply()
+        aviso = "Tela: ${nomeModo(modoTela)}"
+        handler.removeCallbacks(avisoModo)
+        handler.postDelayed(avisoModo, 2_000)
+    }
 
     private var tentativas = 0
     /** null = escolhe pelo endereço; true = força HLS (.m3u8); false = força arquivo/fluxo direto. */
@@ -76,6 +97,14 @@ class PlayerActivity : ComponentActivity() {
         }
         indice = Reproducao.indice
         window.addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
+        // Usa também a área do entalhe da câmera (notch)
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
+            window.attributes = window.attributes.apply {
+                layoutInDisplayCutoutMode = WindowManager.LayoutParams.LAYOUT_IN_DISPLAY_CUTOUT_MODE_SHORT_EDGES
+            }
+        }
+        modoTela = getSharedPreferences("player", Context.MODE_PRIVATE)
+            .getInt("modoTela", AspectRatioFrameLayout.RESIZE_MODE_ZOOM)
 
         val http = DefaultHttpDataSource.Factory()
             .setUserAgent(AGENTE)
@@ -210,6 +239,7 @@ class PlayerActivity : ComponentActivity() {
                 KeyEvent.KEYCODE_DPAD_UP -> if (aoVivo && !controlesAbertos && erro == null && fila.size > 1) { trocar(1); return true }
                 KeyEvent.KEYCODE_DPAD_DOWN -> if (aoVivo && !controlesAbertos && erro == null && fila.size > 1) { trocar(-1); return true }
                 KeyEvent.KEYCODE_INFO -> { mostrarInfoAgora(); return true }
+                KeyEvent.KEYCODE_TV_ZOOM_MODE, KeyEvent.KEYCODE_MENU -> { trocarModoTela(); mostrarInfoAgora(); return true }
             }
         }
         return super.dispatchKeyEvent(event)
@@ -251,6 +281,7 @@ class PlayerActivity : ComponentActivity() {
                         setShowPreviousButton(false)
                         setShowSubtitleButton(true)
                         keepScreenOn = true
+                        resizeMode = modoTela
                         setControllerVisibilityListener(PlayerView.ControllerVisibilityListener { v ->
                             controlesVisiveis = v == View.VISIBLE
                             if (controlesVisiveis) mostrarInfoAgora()
@@ -258,6 +289,7 @@ class PlayerActivity : ComponentActivity() {
                         playerView = this
                     }
                 },
+                update = { it.resizeMode = modoTela },
                 modifier = Modifier.fillMaxSize(),
             )
 
@@ -287,6 +319,15 @@ class PlayerActivity : ComponentActivity() {
                             Text("Canal ${indice + 1} de ${fila.size}", color = TextoSuave, fontSize = 12.sp)
                         }
                     }
+                    TextButton(
+                        onClick = { trocarModoTela() },
+                        modifier = Modifier.focavel(RoundedCornerShape(50)),
+                    ) {
+                        Icon(Icons.Filled.AspectRatio, null, tint = Color.White)
+                        Spacer(Modifier.width(6.dp))
+                        Text(nomeModo(modoTela), color = Color.White)
+                    }
+                    Spacer(Modifier.width(8.dp))
                     if (aoVivo) {
                         Box(Modifier.background(Erro, RoundedCornerShape(4.dp)).padding(horizontal = 6.dp, vertical = 2.dp)) {
                             Text("AO VIVO", color = Color.White, fontSize = 11.sp, fontWeight = FontWeight.Bold)

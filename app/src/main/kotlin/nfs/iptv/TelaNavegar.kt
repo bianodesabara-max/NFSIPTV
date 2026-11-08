@@ -50,7 +50,7 @@ fun TelaNavegar(rota: Rota.Navegar, onSerie: (Item) -> Unit, onTrocarLista: () -
             } catch (e: CancellationException) {
                 throw e
             } catch (e: Exception) {
-                est.erro = e.message ?: "Erro desconhecido (${e.javaClass.simpleName})"
+                est.erro = mensagemDeErro(e)
             } finally {
                 est.carregando = false
             }
@@ -353,7 +353,7 @@ fun TelaSerie(lista: Lista, serie: Item) {
         } catch (e: CancellationException) {
             throw e
         } catch (e: Exception) {
-            erro = e.message ?: "Erro ao carregar a série"
+            erro = mensagemDeErro(e)
         }
     }
 

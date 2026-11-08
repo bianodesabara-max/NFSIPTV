@@ -153,6 +153,18 @@ object Dados {
 // Download e leitura das listas
 // ---------------------------------------------------------------------------------------------
 
+/** Traduz erros de conexão para mensagens que dá para entender. */
+fun mensagemDeErro(e: Throwable): String = when (e) {
+    is java.net.UnknownHostException -> "Servidor não encontrado. Confira o endereço digitado e a sua internet."
+    is java.net.SocketTimeoutException -> "O servidor demorou demais para responder. Confira o endereço (e a porta) ou tente mais tarde."
+    is java.net.ConnectException -> "Não foi possível conectar ao servidor. Confira o endereço, a porta e a sua internet."
+    is javax.net.ssl.SSLException -> "Erro de segurança na conexão com o servidor. Tente usar http:// em vez de https://."
+    is java.net.MalformedURLException -> "Endereço inválido. Confira o que foi digitado."
+    is kotlinx.serialization.SerializationException -> "A lista veio num formato que o app não reconheceu."
+    is OutOfMemoryError -> "A lista é grande demais para a memória deste aparelho."
+    else -> e.message?.takeIf { it.isNotBlank() } ?: "Erro desconhecido (${e.javaClass.simpleName})."
+}
+
 object Repositorio {
 
     /** Carrega o conteúdo da lista: do aparelho (se já baixado) ou do servidor. */

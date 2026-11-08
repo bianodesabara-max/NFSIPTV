@@ -12,8 +12,8 @@ toque "Link da lista"; sleep 1
 adb shell input text "http://10.0.2.2:8000/.github/teste/teste.m3u"
 sleep 1; adb shell input keyevent 111; sleep 1
 toque "Salvar"; sleep 10
-toque "Testes MP4"; sleep 4
-toque "Video MP4 Teste"; sleep 20; foto 1-preencher
+toque "Testes HLS"; sleep 4
+toque "Canal Teste Mux"; sleep 20; foto 1-preencher
 adb shell input tap 1140 540; sleep 1
 toque "Preencher"; sleep 3; foto 2-esticar
 adb shell input tap 1140 540; sleep 1

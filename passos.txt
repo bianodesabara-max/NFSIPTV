@@ -1,0 +1,9 @@
+tocou 'Adicionar lista' em 584,1530
+tocou 'Link M3U' em 524,674
+tocou 'Link da lista' em 391,1275
+tocou 'Salvar' em 793,1506
+tocou 'Testes HLS' em 528,937
+tocou 'Canal Teste Mux' em 647,750
+tocou 'Preencher' em 1908,110
+tocou 'Esticar' em 1935,110
+APP ABERTO

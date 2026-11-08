@@ -3,7 +3,6 @@ package nfs.iptv
 import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
-import android.util.Log
 import android.view.KeyEvent
 import android.view.View
 import android.view.WindowManager
@@ -128,7 +127,6 @@ class PlayerActivity : ComponentActivity() {
         val item = atual ?: return
         handler.removeCallbacks(reconectar)
         erro = null
-        Log.d("NFS", "tocar $indice ${item.nome}")
         val mime = when (forcarHls) {
             true -> MimeTypes.APPLICATION_M3U8
             false -> null
@@ -158,7 +156,6 @@ class PlayerActivity : ComponentActivity() {
     }
 
     private fun tratarErro(e: PlaybackException) {
-        Log.d("NFS", "erro ${e.errorCodeName}", e)
         val item = atual ?: return
         // Endereço sem extensão: tenta como HLS antes de desistir
         val formato = e.errorCode in listOf(
@@ -207,7 +204,6 @@ class PlayerActivity : ComponentActivity() {
     override fun dispatchKeyEvent(event: KeyEvent): Boolean {
         if (event.action == KeyEvent.ACTION_DOWN && ::player.isInitialized) {
             val controlesAbertos = playerView?.isControllerFullyVisible == true
-            Log.d("NFS", "tecla ${event.keyCode} aoVivo=$aoVivo controles=$controlesAbertos erro=${erro != null} fila=${fila.size}")
             when (event.keyCode) {
                 KeyEvent.KEYCODE_CHANNEL_UP -> { trocar(1); return true }
                 KeyEvent.KEYCODE_CHANNEL_DOWN -> { trocar(-1); return true }

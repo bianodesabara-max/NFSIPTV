@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <color name="fundo">#FF0B0F17</color>
+    <color name="icone_fundo">#FF0B0F17</color>
+
+    <style name="Theme.NFSIPTV" parent="android:Theme.Material.NoActionBar">
+        <item name="android:windowBackground">@color/fundo</item>
+    </style>
+
+    <style name="Theme.NFSIPTV.Player" parent="android:Theme.Material.NoActionBar.Fullscreen">
+        <item name="android:windowBackground">@android:color/black</item>
+    </style>
+</resources>

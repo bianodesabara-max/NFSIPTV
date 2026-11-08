@@ -256,12 +256,21 @@ fun DialogoNovaLista(onSalvar: (Lista) -> Unit, onCancelar: () -> Unit) {
 
     // Se colarem o link completo do Xtream (get.php?username=...&password=...), preenche os campos.
     fun aproveitarLinkCompleto(texto: String) {
-        val u = runCatching { Uri.parse(texto.trim()) }.getOrNull() ?: return
-        val usr = u.getQueryParameter("username")
-        val pwd = u.getQueryParameter("password")
-        if (!usr.isNullOrBlank() && !pwd.isNullOrBlank()) {
-            usuario = usr
-            senha = pwd
+        // Enquanto a pessoa digita ("http:", "http://ex"...) o texto ainda não é um endereço completo:
+        // qualquer falha aqui é ignorada para não fechar o app.
+        try {
+            val t = texto.trim()
+            if (!t.contains("username=", ignoreCase = true) || !t.contains("password=", ignoreCase = true)) return
+            val u = Uri.parse(t)
+            if (!u.isHierarchical) return
+            val usr = u.getQueryParameter("username")
+            val pwd = u.getQueryParameter("password")
+            if (!usr.isNullOrBlank() && !pwd.isNullOrBlank()) {
+                usuario = usr
+                senha = pwd
+            }
+        } catch (e: Exception) {
+            // ignora
         }
     }
 
